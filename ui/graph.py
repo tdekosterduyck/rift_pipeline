@@ -1,0 +1,255 @@
+# =============================================================
+# Nom du fichier :    main_graph.py
+# Auteur :            Thomas Dekoster-Duyck
+# Contact             dkthomas.pro@gmail.com
+# Date de création :  22/09/2025
+# Description :       Main Graph UI
+# Version :           1.1
+# Python :            3.12+
+# =============================================================
+
+"""
+TO DO :
+
+- Create my own propertyBin
+- Modify load, import and save session to adapt to a real pipe
+
+CHANGELOG :
+
+1.1 : graph creation and adding my own nodes
+1.2 : add context menu
+
+SUMMARY
+
+line 00 : .....
+
+"""
+
+from Qt import QtWidgets
+from Qt import QtWidgets, QtGui, QtCore 
+from NodeGraphQt import NodeGraph, BaseNode, NodeBaseWidget
+from NodeGraphQt import NodeGraph, PropertiesBinWidget, constants
+
+import os
+import sys
+
+
+#from ui.main_window import Rift
+from core.utils.rfm_nodes import * 
+from core.utils.rfh_nodes import *
+import core.config as paths
+
+
+# ========================================================= PATHS ========================================================= 
+
+# ----------- # JSON PATH # ---------- #
+
+LOAD_PATH = os.path.join(paths.JSON_PATH, "save_session.json")
+SAVE_PATH = os.path.join(paths.JSON_PATH, "save_session.json")
+
+# =========================================================
+# Class : Hotkeys
+# =========================================================
+
+class hotkeys () :
+
+    """
+        All hotkeys in the graph   
+    """
+
+    def __init__(self, graph):
+        self.graph = graph
+
+    # ---------- Browsing / UI ---------- #
+
+    def open_node_search(self):
+
+        self.graph.toggle_node_search()
+
+    def duplicate_node (self) :
+        
+        self.graph.selected_nodes()
+        self.graph.copy_nodes()
+        self.graph.paste_nodes()
+
+    def clear (self) :
+
+        self.graph.clear_session()
+
+    def rfm_load(self):
+
+        self.graph.create_node('IMPORT.Rfm_Load', name='Rfm Load', pos=[300, 300])
+    
+    def rfh_load(self):
+
+        self.graph.create_node('IMPORT.Rfh_Load', name='Rfh Load', pos=[300, 300])
+
+    def merge(self):
+
+        self.graph.create_node('MERGE.Rfm_Merge', name='Rfm Merge', pos=[300, 300])
+    
+    def camera(self):
+
+        self.graph.create_node('IMPORT.Rfm_Camera', name='Rfm Camera', pos=[300, 300])
+
+    def rfm_render(self):
+
+        self.graph.create_node('RENDER.Rfm_Render', name='Rfm Render', pos=[300, 300])
+
+    def rfh_render(self):
+
+        self.graph.create_node('RENDER.Rfh_Render', name='Rfh Render', pos=[300, 300])
+
+    def delete_selected_nodes(self):
+        selected = self.graph.selected_nodes()
+        if selected:
+            self.graph.delete_nodes(selected)
+
+    def find_json_path (self) :
+
+        script_path = os.path.abspath(__file__)
+        script_path.split("Farm")[0]
+
+    def save_graph (self) :
+
+        self.graph.save_session(SAVE_PATH)
+
+        print("#-------# Scene graph has been saved #-------#")
+
+    def load_graph (self) :
+
+        load_file_dialog = QtWidgets.QFileDialog.getOpenFileName(parent=None,caption="Load Graph",dir=LOAD_PATH, filter="Json Files (*.json)")[0]
+        self.graph.load_session(load_file_dialog)
+
+    def import_graph (self) :
+
+        import_file_dialog = QtWidgets.QFileDialog.getOpenFileName(parent=None,caption="Import Graph",dir=paths.BASE_PATH, filter="Json Files (*.json)")[0]
+        self.graph.load_session(import_file_dialog)
+
+    def quit_graph () :
+
+        app.quit()
+        sys.exit()
+
+    def fit_zoom (self) :
+
+        self.graph.fit_to_selection()
+    
+    def layout_dir (self) :
+
+        lyt_dir = self.graph.layout_direction()
+
+        if lyt_dir == 0 : 
+            self.graph.set_layout_direction(1)
+
+        else : 
+            self.graph.set_layout_direction(0)
+
+    def pipe_layout (self) : 
+
+        pipe_style = self.graph.pipe_style()
+        
+        if pipe_style == 2 : 
+            self.graph.set_pipe_style(0)
+        if pipe_style == 0 : 
+            self.graph.set_pipe_style(1)
+        if pipe_style == 1 : 
+            self.graph.set_pipe_style(2)
+
+    def maximise(self):
+        window = self.graph.widget.window()
+        if window.isFullScreen():
+            window.showNormal()
+        else:
+            window.showFullScreen()
+
+# =========================================================
+# Class : Node_Graph
+# =========================================================
+
+class Node_Graph(QtWidgets.QMainWindow):
+
+    def __init__(self, parent=None, data_manager=None):
+        super().__init__(parent)
+        self.farm = parent
+        self.data_manager = data_manager
+
+        self.ui_graph()
+
+    def ui_graph (self) :
+    
+        self.setWindowTitle("Node Graph")
+        self.resize(2000, 2000)
+
+        # --- Init Qt Graph --- #
+        self.graph = NodeGraph()
+        self.graph_widget = self.graph.widget
+        self.graph.set_layout_direction(1)  
+        self.graph.set_pipe_collision(True)    
+        self.graph.set_pipe_slicing(True) 
+        
+        self.hotkeys = hotkeys(self.graph)
+
+        # --- Register Nodes --- #
+        self.graph.register_nodes([Rfm_Load, Rfm_Camera, Rfm_Merge, Rfm_Aovs, Rfm_Layers,Rfm_Cryptos, Rfm_Render])
+        self.graph.register_nodes([Rfh_Load, Rfh_Camera, Rfh_Merge, Rfh_Aovs, Rfh_Layers,Rfh_Cryptos, Rfh_Render])
+
+        self.main_layout = QtWidgets.QHBoxLayout()
+
+        self.central_widget = QtWidgets.QWidget()
+        self.central_lyt = QtWidgets.QHBoxLayout(self.central_widget)
+        self.central_widget.setLayout(self.central_lyt)
+        self.central_lyt.addWidget(self.graph_widget)
+
+        self.graph.node_double_clicked.connect(self.double_clicked)
+
+        # --- Set Central Widget ---
+        self.setCentralWidget(self.central_widget)
+        #self.main_layout.addLayout(self.lyt)
+
+        self.context_menu = self.graph.get_context_menu('graph')
+
+        # Menu général
+        self.context_menu.add_command('Search Nodes', self.hotkeys.open_node_search, shortcut='Tab')
+
+        # Fichier
+        self.file_menu = self.context_menu.add_menu("File")
+        self.file_menu.add_command('New', self.hotkeys.clear, shortcut='CTRL+N')
+        self.file_menu.add_separator()
+        self.file_menu.add_command('Save', self.hotkeys.save_graph, shortcut='CTRL+S')
+        self.file_menu.add_command('Load', self.hotkeys.load_graph, shortcut='CTRL+L')
+        self.file_menu.add_command('Import', self.hotkeys.load_graph, shortcut='CTRL+I')
+        self.file_menu.add_separator()
+        self.file_menu.add_command('Quit', self.hotkeys.quit_graph, shortcut='CTRL+Q')
+
+        # Édition
+        self.edit_menu = self.context_menu.add_menu("Edit")
+        self.edit_menu.add_command('Delete Node', self.hotkeys.delete_selected_nodes, shortcut='Delete')
+        self.edit_menu.add_command('Duplicate', self.hotkeys.duplicate_node, shortcut='CTRL+D')
+        self.edit_menu.add_command('Fit', self.hotkeys.fit_zoom, shortcut='F')
+        self.edit_menu.add_command('Direction', self.hotkeys.layout_dir, shortcut='CTRL+ALT+L')
+        self.edit_menu.add_command('Pipe Layout', self.hotkeys.pipe_layout, shortcut='CTRL+Y')
+        self.edit_menu.add_command('Maximise', self.hotkeys.maximise, shortcut='F11')
+
+        # Raccourcis clavier
+        self.hotkeys_menu = self.context_menu.add_menu("HotKeys")
+        self.hotkeys_menu.add_command('Rfm Load', self.hotkeys.rfm_load, shortcut='L')
+        self.hotkeys_menu.add_command('Rfh Load', self.hotkeys.rfh_load, shortcut='SHIFT+L')
+        self.hotkeys_menu.add_command('Merge', self.hotkeys.merge, shortcut='M')
+        self.hotkeys_menu.add_command('Camera', self.hotkeys.camera, shortcut='C')
+        self.hotkeys_menu.add_command('Rfm Render', self.hotkeys.rfm_render, shortcut='R')
+        self.hotkeys_menu.add_command('Rfh Render', self.hotkeys.rfh_render, shortcut='SHIFT+R')
+
+    def double_clicked (self, node) :
+
+        node_name = node.name()
+
+        node_label = node.get_property("label")
+
+        ppb_node_label = f"ppb_{node_label}"
+
+        self.data_manager.save_text([node_name, node_label])
+
+        self.farm.add_property(ppb_node_label, node) 
+
+
