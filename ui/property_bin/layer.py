@@ -63,35 +63,42 @@ class Layer (QtWidgets.QWidget) :
 
         # ============================================================================ Loading File
 
+        # ---------- # List Load # ---------- #
+
         #- Title size
         Cstm_Widgets.default_node_subtitle(lyt_main, "List Asset", self.soft)
 
-        lyt_list = QtWidgets.QVBoxLayout()
-        lyt_main.addLayout(lyt_list)
+        lyt_list_load = QtWidgets.QVBoxLayout()
+        lyt_main.addLayout(lyt_list_load)
 
         lbl_list_load = QtWidgets.QLabel("List of all Load node")
-        lyt_list.addWidget(lbl_list_load)
+        lyt_list_load.addWidget(lbl_list_load)
 
         self.list_load = QtWidgets.QListWidget()
         self.show_item_load()
         self.list_load.itemDoubleClicked.connect(self.open_renaming_ui)
-        lyt_list.addWidget(self.list_load)
+        lyt_list_load.addWidget(self.list_load)
+
+        # ---------- # List Layer # ---------- #
 
         #- Title size
         Cstm_Widgets.default_node_subtitle(lyt_main, "Layering", self.soft)
 
+        lyt_list_layer = QtWidgets.QVBoxLayout()
+        lyt_main.addLayout(lyt_list_layer)
+
         lbl_list_load = QtWidgets.QLabel("List of layers to render")
-        lyt_list.addWidget(lbl_list_load)
+        lyt_list_layer.addWidget(lbl_list_load)
 
         self.edit_layer_name = QtWidgets.QLineEdit()
-        lyt_list.addWidget(self.edit_layer_name)
+        lyt_list_layer.addWidget(self.edit_layer_name)
 
         btn_add_layer = QtWidgets.QPushButton("Add Layer")
         btn_add_layer.clicked.connect(self.add_layer_to_list)
-        lyt_list.addWidget(btn_add_layer)
+        lyt_list_layer.addWidget(btn_add_layer)
 
         self.tree_layer = QtWidgets.QTreeView()
-        lyt_list.addWidget(self.tree_layer)     
+        lyt_list_layer.addWidget(self.tree_layer)     
 
         self.header = QtGui.QStandardItemModel()
         self.header.setHorizontalHeaderLabels(["Layers"])
@@ -105,15 +112,22 @@ class Layer (QtWidgets.QWidget) :
     # ========================================================= EVENT ========================================================= 
 
     def show_item_load (self) :
-
+        """
+            At the creation node show all of 
+            load node in the scene node graph 
+        """
         list_load = self.node_graph.list_all_node()
         for load in list_load :
             self.list_load.addItem(load)
 
     def add_layer_to_list (self) :
-
+        """
+            Add a layer to my tree widget with a 
+            name of an edit widget
+        """
         self.add_cate = QtGui.QStandardItem(self.edit_layer_name.text())
         self.header.appendRow(self.add_cate)
+        self.edit_layer_name.clear()
 
     def open_renaming_ui (self) :
 
