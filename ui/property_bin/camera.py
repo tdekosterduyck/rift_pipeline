@@ -22,18 +22,20 @@ class Camera (QtWidgets.QWidget) :
             self.color = "#4a78d3"
             self.dark_color = "#162064"
             self.hover_color = "#698dd4"
-            self.soft_path = paths.ICON_RFM_LOAD
+            self.soft_path = paths.ICON_RFM_CAMERA
             self.path_folder = paths.RFM_ICON_FOLDER
             self.path_folder_hover = paths.RFM_ICON_FOLDER_HOVER
+            self.extention = "*ma *mb"
 
         else :
 
             self.color = "#d6582a"
             self.dark_color = "#3F170A"
             self.hover_color = "#ee6736"
-            self.soft_path = paths.ICON_RFH_LOAD
+            self.soft_path = paths.ICON_RFH_CAMERA
             self.path_folder =paths.RFH_ICON_FOLDER
             self.path_folder_hover = paths.RFH_ICON_FOLDER_HOVER
+            self.extention = "*usd"
 
     def ui_load (self) :
 
@@ -102,7 +104,7 @@ class Camera (QtWidgets.QWidget) :
     # ---------------------------------------------------------------- EVENT ----------------------------------------------------------------
 
     def open_browser_load(self):
-        file_dialog = QtWidgets.QFileDialog.getOpenFileName(self,"Select Folder","","")
+        file_dialog = QtWidgets.QFileDialog.getOpenFileName(self,"Select Folder","",self.extention)
         print(">>> Result:", file_dialog) 
         if file_dialog:
             self.edit_browser.setText(file_dialog[0])

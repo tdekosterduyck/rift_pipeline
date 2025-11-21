@@ -55,6 +55,7 @@ class Rift (QtWidgets.QMainWindow):
 
     def __init__(self, data_manager):
         super(Rift, self).__init__()
+
         self.data_manager = data_manager
         self.graph_dock = None 
         self.node_graph = Node_Graph(parent=self, data_manager=self.data_manager)
@@ -679,7 +680,7 @@ class Rift (QtWidgets.QMainWindow):
 
         #- Add widget to ppb settings & infos
 
-        self.ppb_instance = Ppb_Widget(data_manager=self.data_manager)
+        self.ppb_instance = Ppb_Widget(data_manager=self.data_manager, node_graph=self.node_graph)
         methods_to_call = [widget, f"{widget}_info"] # List all methods to call in property_bin.py
 
         for m in methods_to_call:

@@ -88,9 +88,13 @@ class hotkeys () :
 
         self.graph.create_node('MERGE.Rfm_Merge', name='Rfm Merge', pos=[300, 300])
     
-    def camera(self):
+    def rfm_camera(self):
 
         self.graph.create_node('IMPORT.Rfm_Camera', name='Rfm Camera', pos=[300, 300])
+
+    def rfh_camera(self):
+
+        self.graph.create_node('IMPORT.Rfh_Camera', name='Rfh Camera', pos=[300, 300])
 
     def rfm_render(self):
 
@@ -236,7 +240,8 @@ class Node_Graph(QtWidgets.QMainWindow):
         self.hotkeys_menu.add_command('Rfm Load', self.hotkeys.rfm_load, shortcut='L')
         self.hotkeys_menu.add_command('Rfh Load', self.hotkeys.rfh_load, shortcut='SHIFT+L')
         self.hotkeys_menu.add_command('Merge', self.hotkeys.merge, shortcut='M')
-        self.hotkeys_menu.add_command('Camera', self.hotkeys.camera, shortcut='C')
+        self.hotkeys_menu.add_command('Rfm Camera', self.hotkeys.rfm_camera, shortcut='C')
+        self.hotkeys_menu.add_command('Rfh Camera', self.hotkeys.rfh_camera, shortcut='SHIFT + C')
         self.hotkeys_menu.add_command('Rfm Render', self.hotkeys.rfm_render, shortcut='R')
         self.hotkeys_menu.add_command('Rfh Render', self.hotkeys.rfh_render, shortcut='SHIFT+R')
 
@@ -251,5 +256,16 @@ class Node_Graph(QtWidgets.QMainWindow):
         self.data_manager.save_text([node_name, node_label])
 
         self.farm.add_property(ppb_node_label, node) 
+
+    def list_all_node (self) :
+
+        list_all_nodes = self.graph.all_nodes()
+        nodes_name = []
+        for nodes in list_all_nodes :
+
+            node_name = nodes.name()
+            nodes_name.append(node_name)
+
+        return nodes_name
 
 
