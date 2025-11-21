@@ -120,7 +120,9 @@ class Rfh_Camera (BaseNode):
         self.add_output('out')
         self.set_color(254,71,3) 
 
-        self.add_custom_widget(Default_ImgWrpr(paths.ICON_CAMERA, self.view))  
+        self.create_property("label", "rfh_camera", items=None, range=None, widget_type=None, widget_tooltip=None, tab=None)
+
+        self.add_custom_widget(Default_ImgWrpr(paths.ICON_RFH_CAMERA, self.view))  
 
 ## ========================================================= ## Rfh AOVS ## ========================================================= ##
 

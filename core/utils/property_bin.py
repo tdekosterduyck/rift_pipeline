@@ -5,16 +5,23 @@ import subprocess
 
 import core.config as paths
 
+
 from ui.property_bin.render_settings import Render_Settings
 from ui.property_bin.load import Load
+from ui.property_bin.camera import Camera
+from ui.property_bin.layer import Layer
 
 # ========================================================= PPB ========================================================= 
 
 class Ppb_Widget (QtWidgets.QWidget) :
 
-    def __init__(self,data_manager):
+    def __init__(self,data_manager, node_graph):
         super().__init__()
+
         self.data_manager = data_manager
+        self.node_graph = node_graph
+        
+        #self.layer = Layer(self.node_graph)
 
     # ---------------------------------------------------------------- DEFAULT ----------------------------------------------------------------
 
@@ -275,7 +282,7 @@ class Ppb_Widget (QtWidgets.QWidget) :
 
     def ppb_rfm_camera (self,layout) :
 
-        layout.addWidget(Load(soft="maya"))
+        layout.addWidget(Camera(soft="maya"))
 
         return self
     
@@ -371,17 +378,48 @@ class Ppb_Widget (QtWidgets.QWidget) :
     
     # ---------------------------------------------------------------- RFM LAYERS ----------------------------------------------------------------
 
-    def ppb_rfm_layers (self, layout) :
-        
-        grp_main_layers, lyt_main_layers = self.default_widget("Rfm Layers", "maya")
+    def ppb_rfm_layer (self,layout) :
 
-        btn_title_aovs = QtWidgets.QPushButton("Layers")
-        lyt_main_layers.addWidget(btn_title_aovs)
-
-        layout.addWidget(grp_main_layers)
+        layout.addWidget(Layer(soft="maya", node_graph=self.node_graph))
 
         return self
-    
+
+    def ppb_rfm_layer_info (self, layout) :
+
+        grp_main_info = QtWidgets.QWidget()
+        lyt_main_info = QtWidgets.QVBoxLayout()
+        grp_main_info.setLayout(lyt_main_info)
+
+        #-----# Node information #-----#
+
+        self.default_node_info(lyt_main_info, self.data_manager.get_text()[0], self.data_manager.get_text()[1])
+
+        #-----# Settings information #-----#
+
+        #- Size
+
+        lbl_info_title_size = QtWidgets.QLabel(f"Size : ")
+        lbl_info_title_size.setStyleSheet("""QLabel{ color : #ffffff; font : bold; margin-bottom : 2px; }""")
+        lyt_main_info.addWidget(lbl_info_title_size)
+        
+        lbl_info_size = QtWidgets.QLabel(f"You can choose default image \nsizes from the drop-down menu or \nenter the size of your choice directly \nin the boxes.")
+        lbl_info_size.setStyleSheet("""QLabel{ color : #ffffff; margin-bottom : 2px; }""")
+        lyt_main_info.addWidget(lbl_info_size)
+
+        #- Frame range 
+
+        lbl_info_title_fr = QtWidgets.QLabel(f"Frame Range : ")
+        lbl_info_title_fr.setStyleSheet("""QLabel{ color : #ffffff; font : bold; margin-bottom : 2px;}""")
+        lyt_main_info.addWidget(lbl_info_title_fr)
+
+        lbl_info_frame_range = QtWidgets.QLabel(f"Single to render one frame\n Range to render a series of \nconsecutive frames \nCustom to render several different \nframes")
+        lbl_info_frame_range.setStyleSheet("""QLabel{ color : #ffffff; margin-bottom : 2px; }""")
+        lyt_main_info.addWidget(lbl_info_frame_range)
+
+        lyt_main_info.addStretch()
+
+        layout.addWidget(grp_main_info)
+
     # ---------------------------------------------------------------- RFM RENDER ----------------------------------------------------------------
 
     def ppb_rfm_render (self, layout) :
@@ -475,7 +513,7 @@ class Ppb_Widget (QtWidgets.QWidget) :
 
     def ppb_rfh_camera (self,layout) :
 
-        layout.addWidget(Load(soft="houdini"))
+        layout.addWidget(Camera(soft="houdini"))
 
         return self
     

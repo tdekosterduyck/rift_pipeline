@@ -122,7 +122,7 @@ class Rfm_Camera (BaseNode):
         self.set_name(name="Camera")
         self.set_icon(icon=paths.ICON_MAYA)
         self.add_output('out')
-        self.set_color(222,28,28)   
+        self.set_color(75,118,206)  
 
         self.create_property("label", "rfm_camera", items=None, range=None, widget_type=None, widget_tooltip=None, tab=None)
 

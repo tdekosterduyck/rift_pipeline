@@ -20,8 +20,8 @@ JSON_PATH = os.path.join(BASE_PATH, "json")
 #- Side bar
 
 ICON_HOME = os.path.join(ICON_PATH, "home.png").replace("\\","/")
-ICON_GRAPH = os.path.join(ICON_PATH, "render_graph.png").replace("\\","/")
-ICON_FARM = os.path.join(ICON_PATH, "farm.png").replace("\\","/")
+ICON_GRAPH = os.path.join(ICON_PATH, "render_graph.svg").replace("\\","/")
+ICON_FARM = os.path.join(ICON_PATH, "farm.svg").replace("\\","/")
 ICON_SETTINGS = os.path.join(ICON_PATH, "settings.png").replace("\\","/")
 ICON_EXIT = os.path.join(ICON_PATH, "exit.png").replace("\\","/")
 
@@ -58,11 +58,11 @@ ICON_RFM_RENDER = os.path.join(ICON_PATH, "rfm_render.svg")
 
 ICON_HOUDINI = os.path.join(ICON_PATH, "houdini.png")
 ICON_RFH_LOAD = os.path.join(ICON_PATH, "rfh_load.svg")
-ICON_RFM_MERGE = os.path.join(ICON_PATH, "rfh_merge.svg")
-ICON_RFM_CAMERA = os.path.join(ICON_PATH, "rfh_camera.svg")
-ICON_RFM_AOVS = os.path.join(ICON_PATH, "rfh_aovs.svg")
-ICON_RFM_CRYPTOS = os.path.join(ICON_PATH, "rfh_cryptos.svg")
-ICON_RFM_LAYERS = os.path.join(ICON_PATH, "rfh_layers.svg")
+ICON_RFH_MERGE = os.path.join(ICON_PATH, "rfh_merge.svg")
+ICON_RFH_CAMERA = os.path.join(ICON_PATH, "rfh_camera.svg")
+ICON_RFH_AOVS = os.path.join(ICON_PATH, "rfh_aovs.svg")
+ICON_RFH_CRYPTOS = os.path.join(ICON_PATH, "rfh_cryptos.svg")
+ICON_RFH_LAYERS = os.path.join(ICON_PATH, "rfh_layers.svg")
 ICON_RFH_RENDER = os.path.join(ICON_PATH, "rfh_render.svg")
 
 # ---- # Property Bin # ---- #
