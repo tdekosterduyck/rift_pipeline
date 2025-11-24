@@ -32,20 +32,13 @@ from NodeGraphQt import NodeGraph, PropertiesBinWidget, constants
 
 import os
 import sys
-
+import json
 
 #from ui.main_window import Rift
 from core.utils.rfm_nodes import * 
 from core.utils.rfh_nodes import *
 import core.config as paths
 
-
-# ========================================================= PATHS ========================================================= 
-
-# ----------- # JSON PATH # ---------- #
-
-LOAD_PATH = os.path.join(paths.JSON_PATH, "save_session.json")
-SAVE_PATH = os.path.join(paths.JSON_PATH, "save_session.json")
 
 # =========================================================
 # Class : Hotkeys
@@ -76,64 +69,23 @@ class hotkeys () :
 
         self.graph.clear_session()
 
-    def rfm_load(self):
-
-        self.graph.create_node('IMPORT.Rfm_Load', name='Rfm Load', pos=[300, 300])
-    
-    def rfh_load(self):
-
-        self.graph.create_node('IMPORT.Rfh_Load', name='Rfh Load', pos=[300, 300])
-
-    def merge(self):
-
-        self.graph.create_node('MERGE.Rfm_Merge', name='Rfm Merge', pos=[300, 300])
-    
-    def rfm_camera(self):
-
-        self.graph.create_node('IMPORT.Rfm_Camera', name='Rfm Camera', pos=[300, 300])
-
-    def rfh_camera(self):
-
-        self.graph.create_node('IMPORT.Rfh_Camera', name='Rfh Camera', pos=[300, 300])
-
-    def rfm_render(self):
-
-        self.graph.create_node('RENDER.Rfm_Render', name='Rfm Render', pos=[300, 300])
-
-    def rfh_render(self):
-
-        self.graph.create_node('RENDER.Rfh_Render', name='Rfh Render', pos=[300, 300])
-
     def delete_selected_nodes(self):
+        
         selected = self.graph.selected_nodes()
+        print(selected)
+        print(selected[0].name())
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "r", encoding="utf-8") as f :
+            self.nodegraph = json.load(f)
+
+        for node in selected :
+            del self.nodegraph[node.name()]
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "w", encoding="utf-8") as nodegraph :
+            json.dump(self.nodegraph, nodegraph, ensure_ascii=False, indent=4) 
+
         if selected:
             self.graph.delete_nodes(selected)
-
-    def find_json_path (self) :
-
-        script_path = os.path.abspath(__file__)
-        script_path.split("Farm")[0]
-
-    def save_graph (self) :
-
-        self.graph.save_session(SAVE_PATH)
-
-        print("#-------# Scene graph has been saved #-------#")
-
-    def load_graph (self) :
-
-        load_file_dialog = QtWidgets.QFileDialog.getOpenFileName(parent=None,caption="Load Graph",dir=LOAD_PATH, filter="Json Files (*.json)")[0]
-        self.graph.load_session(load_file_dialog)
-
-    def import_graph (self) :
-
-        import_file_dialog = QtWidgets.QFileDialog.getOpenFileName(parent=None,caption="Import Graph",dir=paths.BASE_PATH, filter="Json Files (*.json)")[0]
-        self.graph.load_session(import_file_dialog)
-
-    def quit_graph () :
-
-        app.quit()
-        sys.exit()
 
     def fit_zoom (self) :
 
@@ -167,6 +119,65 @@ class hotkeys () :
         else:
             window.showFullScreen()
 
+    # ---------- Creating Nodes ---------- #
+
+    def rfm_load(self):
+
+        self.graph.create_node('IMPORT.Rfm_Load', name='Rfm Load', pos=[300, 300])
+    
+    def rfh_load(self):
+
+        self.graph.create_node('IMPORT.Rfh_Load', name='Rfh Load', pos=[300, 300])
+
+    def merge(self):
+
+        self.graph.create_node('MERGE.Rfm_Merge', name='Rfm Merge', pos=[300, 300])
+    
+    def rfm_camera(self):
+
+        self.graph.create_node('IMPORT.Rfm_Camera', name='Rfm Camera', pos=[300, 300])
+
+    def rfh_camera(self):
+
+        self.graph.create_node('IMPORT.Rfh_Camera', name='Rfh Camera', pos=[300, 300])
+
+    def rfm_render(self):
+
+        self.graph.create_node('RENDER.Rfm_Render', name='Rfm Render', pos=[300, 300])
+
+    def rfh_render(self):
+
+        self.graph.create_node('RENDER.Rfh_Render', name='Rfh Render', pos=[300, 300])
+
+    # ---------- Management ---------- #
+
+    def find_json_path (self) :
+
+        script_path = os.path.abspath(__file__)
+        script_path.split("Farm")[0]
+
+    def save_graph (self) :
+
+        self.graph.save_session(paths.SAVE_PATH)
+
+        print("#-------# Scene graph has been saved #-------#")
+
+    def load_graph (self) :
+
+        load_file_dialog = QtWidgets.QFileDialog.getOpenFileName(parent=None,caption="Load Graph",dir=paths.LOAD_PATH, filter="Json Files (*.json)")[0]
+        self.graph.load_session(load_file_dialog)
+
+    def import_graph (self) :
+
+        import_file_dialog = QtWidgets.QFileDialog.getOpenFileName(parent=None,caption="Import Graph",dir=paths.BASE_PATH, filter="Json Files (*.json)")[0]
+        self.graph.load_session(import_file_dialog)
+
+    def quit_graph () :
+
+        app.quit()
+        sys.exit()
+
+
 # =========================================================
 # Class : Node_Graph
 # =========================================================
@@ -194,7 +205,8 @@ class Node_Graph(QtWidgets.QMainWindow):
         
         self.hotkeys = hotkeys(self.graph)
 
-        # --- Register Nodes --- #
+        # ----- # Register Nodes # ----- #
+
         self.graph.register_nodes([Rfm_Load, Rfm_Camera, Rfm_Merge, Rfm_Aovs, Rfm_Layers,Rfm_Cryptos, Rfm_Render])
         self.graph.register_nodes([Rfh_Load, Rfh_Camera, Rfh_Merge, Rfh_Aovs, Rfh_Layers,Rfh_Cryptos, Rfh_Render])
 
@@ -205,11 +217,15 @@ class Node_Graph(QtWidgets.QMainWindow):
         self.central_widget.setLayout(self.central_lyt)
         self.central_lyt.addWidget(self.graph_widget)
 
-        self.graph.node_double_clicked.connect(self.double_clicked)
+        # ----- # Signal # ----- #
 
-        # --- Set Central Widget ---
+        self.graph.node_double_clicked.connect(self.double_clicked)
+        self.graph.property_changed.connect(self.property_changed)
+        self.graph.node_created.connect(self.create_json_info)
+
+        # ----- # Context Menu # ----- #
+
         self.setCentralWidget(self.central_widget)
-        #self.main_layout.addLayout(self.lyt)
 
         self.context_menu = self.graph.get_context_menu('graph')
 
@@ -245,19 +261,60 @@ class Node_Graph(QtWidgets.QMainWindow):
         self.hotkeys_menu.add_command('Rfm Render', self.hotkeys.rfm_render, shortcut='R')
         self.hotkeys_menu.add_command('Rfh Render', self.hotkeys.rfh_render, shortcut='SHIFT+R')
 
+    # ---------------------------------------------------------------- EVENT ----------------------------------------------------------------
+
+    def create_json_info (self, node) :
+        """
+            Signal when node is created
+                - creating json infos
+        """
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "r", encoding="utf-8") as f :
+            self.nodegraph = json.load(f)
+        node_name = self.nodegraph.values()
+        
+        list_id = []
+        for value in node_name :
+
+            node_id = value.get("id")
+
+            if node_id is None :
+                list_id.append(0)
+            else :
+                list_id.append(int(node_id))
+
+        create_id = list_id[-1] + 1 
+
+        folder_path = {
+            "id" : create_id,
+        }
+
+        self.nodegraph[node.name()] = folder_path
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "w", encoding="utf-8") as nodegraph :
+            json.dump(self.nodegraph, nodegraph, ensure_ascii=False, indent=4) 
+
     def double_clicked (self, node) :
+        """
+            Signal when a node is double clicked 
+                - add info for property bin
+        """
 
         node_name = node.name()
 
         node_label = node.get_property("label")
+        node_id = node.get_property("id") 
 
         ppb_node_label = f"ppb_{node_label}"
 
-        self.data_manager.save_text([node_name, node_label])
+        self.data_manager.save_text([node_name, node_label, node_id])
 
         self.farm.add_property(ppb_node_label, node) 
 
     def list_all_node (self) :
+        """
+            Used for list load node for layer node ui
+        """
 
         list_all_nodes = self.graph.all_nodes()
         nodes_name = []
@@ -268,4 +325,25 @@ class Node_Graph(QtWidgets.QMainWindow):
 
         return nodes_name
 
+    def property_changed (self, node) :
+        """
+            Signal when a node is renamed 
+                - update json nodegraph file
+        """
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "r", encoding="utf-8") as f :
+            self.nodegraph = json.load(f)
+
+        target_node_id = node.get_property("id") 
+        new_name = node.get_property("name")
+
+        for key, value in self.nodegraph.items() :
+
+            if value.get("id") == target_node_id:
+
+                self.nodegraph[new_name] = self.nodegraph.pop(key)
+                break
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "w", encoding="utf-8") as nodegraph :
+            json.dump(self.nodegraph, nodegraph, ensure_ascii=False, indent=4) 
 
