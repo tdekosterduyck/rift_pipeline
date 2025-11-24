@@ -2,20 +2,32 @@ from PySide6 import QtWidgets, QtGui, QtCore
 import core.config as paths
 from ui.custom_widgets.custom_widget import Cstm_Widgets
 
+import json
+
 # =========================================================
 # Class : Load
 # =========================================================
 
 class Load (QtWidgets.QWidget) :
 
-    def __init__(self, soft) :
+    def __init__(self, soft, data_manager) :
         super().__init__()
 
         self.soft = soft
-        self.define_soft()
+        self.data_manager = data_manager
+        self.loader()
         self.ui_load()
 
-    def define_soft (self) :
+    def loader (self) :
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "r", encoding="utf-8") as f :
+            self.nodegraph = json.load(f)
+
+        if self.data_manager.get_text()[0] in self.nodegraph:
+            self.folder_path = self.nodegraph[self.data_manager.get_text()[0]]["folder_path"]
+        else:
+            self.folder_path = ""
+            self.node_not_exist()
 
         if self.soft == "maya" :
 
@@ -61,7 +73,7 @@ class Load (QtWidgets.QWidget) :
         lyt_browser = QtWidgets.QHBoxLayout()
         lyt_main.addLayout(lyt_browser)
 
-        self.edit_browser = QtWidgets.QLineEdit()
+        self.edit_browser = QtWidgets.QLineEdit(self.folder_path)
         self.edit_browser.setMinimumWidth(220)
         self.edit_browser.setFixedHeight(34)
         self.edit_browser.setAlignment(QtGui.Qt.AlignRight)
@@ -80,7 +92,6 @@ class Load (QtWidgets.QWidget) :
         lyt_browser.addWidget(self.edit_browser)
 
         btn_open_browser = QtWidgets.QPushButton()
-        #btn_open_browser.setFixedSize(20,20)
         btn_open_browser.setStyleSheet(f"""
             QPushButton {{
                 border: none;
@@ -103,8 +114,31 @@ class Load (QtWidgets.QWidget) :
 
     # ---------------------------------------------------------------- EVENT ----------------------------------------------------------------
 
+    #def node_exist (self) :
+        
+        
+
+    def node_not_exist (self) :
+    
+        fodler_path = {
+            "id" : self.data_manager.get_text()[2],
+            "folder_path" : ""
+        }
+
+        self.nodegraph[self.data_manager.get_text()[0]] = fodler_path
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "w", encoding="utf-8") as nodegraph :
+            json.dump(self.nodegraph, nodegraph, ensure_ascii=False, indent=4)
+
     def open_browser_load(self):
         file_dialog = QtWidgets.QFileDialog.getOpenFileName(self,"Select Folder","",self.extention)
         print(">>> Result:", file_dialog) 
         if file_dialog:
             self.edit_browser.setText(file_dialog[0])
+
+        #- write selected path to json nodegraph
+
+        self.nodegraph[self.data_manager.get_text()[0]]["folder_path"] = file_dialog[0]
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "w", encoding="utf-8") as nodegraph :
+            json.dump(self.nodegraph, nodegraph, ensure_ascii=False, indent=4) 
