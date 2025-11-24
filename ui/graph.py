@@ -191,6 +191,8 @@ class Node_Graph(QtWidgets.QMainWindow):
 
         self.ui_graph()
 
+    # ---------------------------------------------------------------- GRAPH ----------------------------------------------------------------
+
     def ui_graph (self) :
     
         self.setWindowTitle("Node Graph")
@@ -268,13 +270,17 @@ class Node_Graph(QtWidgets.QMainWindow):
             Signal when node is created
                 - creating json infos
         """
+        node_name = node.name()
+        node_label = node.get_property("label")
+
+        self.data_manager.save_text(node_name, node_label)
 
         with open (f"{paths.JSON_PATH}/nodegraph.json", "r", encoding="utf-8") as f :
             self.nodegraph = json.load(f)
-        node_name = self.nodegraph.values()
+        json_node_name = self.nodegraph.values()
         
         list_id = []
-        for value in node_name :
+        for value in json_node_name :
 
             node_id = value.get("id")
 
@@ -303,11 +309,10 @@ class Node_Graph(QtWidgets.QMainWindow):
         node_name = node.name()
 
         node_label = node.get_property("label")
-        node_id = node.get_property("id") 
 
         ppb_node_label = f"ppb_{node_label}"
 
-        self.data_manager.save_text([node_name, node_label, node_id])
+        self.data_manager.save_text(node_name, node_label)
 
         self.farm.add_property(ppb_node_label, node) 
 
@@ -334,7 +339,8 @@ class Node_Graph(QtWidgets.QMainWindow):
         with open (f"{paths.JSON_PATH}/nodegraph.json", "r", encoding="utf-8") as f :
             self.nodegraph = json.load(f)
 
-        target_node_id = node.get_property("id") 
+        target_node_id = self.nodegraph[self.data_manager.get_text()[0] ]["id"]
+
         new_name = node.get_property("name")
 
         for key, value in self.nodegraph.items() :
@@ -346,4 +352,7 @@ class Node_Graph(QtWidgets.QMainWindow):
 
         with open (f"{paths.JSON_PATH}/nodegraph.json", "w", encoding="utf-8") as nodegraph :
             json.dump(self.nodegraph, nodegraph, ensure_ascii=False, indent=4) 
+
+        #- Update data_manager file    
+        self.data_manager.save_text(new_name)
 
