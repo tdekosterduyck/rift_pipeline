@@ -2,20 +2,63 @@ from PySide6 import QtWidgets, QtGui, QtCore
 import core.config as paths
 from ui.custom_widgets.custom_widget import Cstm_Widgets
 
+import json
+
 # =========================================================
 # Class : Render_Settings
 # =========================================================
 
 class Render_Settings (QtWidgets.QWidget) :
 
-    def __init__(self, soft ):
+    def __init__(self, soft, data_manager ):
         super().__init__()
 
         self.soft = soft
-        self.define_soft()
+        self.data_manager = data_manager
+        self.loader()
         self.ui_render_settings()
 
-    def define_soft (self) :
+    def loader (self) :
+
+        # ----- # Create missing json key # ----- #
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "r", encoding="utf-8") as f :
+            self.nodegraph = json.load(f)
+
+        if self.nodegraph.get(self.data_manager.get_text()[0], {}).get("size") is None:
+
+            #- Put variables on default value
+
+            self.image_width = "960"
+            self.image_height = "540"
+            self.range = ""
+            self.min_sample = "32"
+            self.max_sample = "128"
+            self.pix_var = "0.05"
+            self.ver = "1"
+
+            #- Create json key value
+
+            self.nodegraph[self.data_manager.get_text()[0]]["image_width"] = self.image_width
+            self.nodegraph[self.data_manager.get_text()[0]]["image_height"] = self.image_height
+            self.nodegraph[self.data_manager.get_text()[0]]["range"] = self.range
+            self.nodegraph[self.data_manager.get_text()[0]]["min_sample"] = self.min_sample
+            self.nodegraph[self.data_manager.get_text()[0]]["max_sample"] = self.max_sample
+            self.nodegraph[self.data_manager.get_text()[0]]["pix_var"] = self.pix_var
+            self.nodegraph[self.data_manager.get_text()[0]]["ver"] = self.ver
+
+            with open (f"{paths.JSON_PATH}/nodegraph.json", "w", encoding="utf-8") as nodegraph :
+                json.dump(self.nodegraph, nodegraph, ensure_ascii=False, indent=4) 
+        else:
+            self.image_width = self.nodegraph.get(self.data_manager.get_text()[0], {}).get("image_width")
+            self.image_height = self.nodegraph.get(self.data_manager.get_text()[0], {}).get("image_height")
+            self.range = self.nodegraph.get(self.data_manager.get_text()[0], {}).get("range")
+            self.min_sample = self.nodegraph.get(self.data_manager.get_text()[0], {}).get("min_sample")
+            self.max_sample = self.nodegraph.get(self.data_manager.get_text()[0], {}).get("max_sample")
+            self.pix_var = self.nodegraph.get(self.data_manager.get_text()[0], {}).get("pix_var")
+            self.ver = self.nodegraph.get(self.data_manager.get_text()[0], {}).get("ver")
+
+        # ----- # Create Ui with soft# ----- #
 
         if self.soft == "maya" :
 
@@ -114,7 +157,7 @@ class Render_Settings (QtWidgets.QWidget) :
         #-----# QEdit Width #-----#
 
         self.edit_width = self.default_line_edit()
-        self.edit_width.setText("960")
+        self.edit_width.setText(self.image_width)
         self.edit_width.setMinimumHeight(22)
         self.edit_width.setStyleSheet(f"""
             QLineEdit {{
@@ -128,6 +171,8 @@ class Render_Settings (QtWidgets.QWidget) :
                 border : 1px solid {self.color}; 
             }}                   
         """)
+        self.edit_width.editingFinished.connect(self.width_update_json)
+        self.edit_width.textChanged.connect(self.width_update_json)
 
         lyt_size_combo.addWidget(self.edit_width)
         
@@ -167,6 +212,7 @@ class Render_Settings (QtWidgets.QWidget) :
         self.combo_img_size.addItem("Custom", userData="100")
 
         self.combo_img_size.currentIndexChanged.connect(self.update_combobox)
+        self.combo_img_size.editTextChanged.connect(self.height_update_json)
         self.update_combobox(self.combo_img_size.currentIndex())
 
         lyt_size_combo.addWidget(self.combo_img_size)
@@ -279,7 +325,7 @@ class Render_Settings (QtWidgets.QWidget) :
 
         #- Enter Range 
 
-        self.edit_range = QtWidgets.QLineEdit (placeholderText="1001")
+        self.edit_range = QtWidgets.QLineEdit (placeholderText=self.range)
         self.edit_range.setStyleSheet(f"""
             QLineEdit {{
                 background-color : #d8d8d8; 
@@ -314,7 +360,7 @@ class Render_Settings (QtWidgets.QWidget) :
 
         self.edit_min_sample = self.default_line_edit()
         self.edit_min_sample.setMaximumSize(50,22)
-        self.edit_min_sample.setText("32")
+        self.edit_min_sample.setText(self.min_sample)
 
         self.edit_min_sample.returnPressed.connect(self.update_slider_min_sample)
         self.edit_min_sample.editingFinished.connect(self.update_slider_min_sample)
@@ -354,7 +400,7 @@ class Render_Settings (QtWidgets.QWidget) :
 
         self.edit_max_sample = self.default_line_edit()
         self.edit_max_sample.setMaximumSize(50,22)
-        self.edit_max_sample.setText("128")
+        self.edit_max_sample.setText(self.max_sample)
 
         self.edit_max_sample.editingFinished.connect(self.update_slider_max_sample)
         self.edit_max_sample.returnPressed.connect(self.update_slider_max_sample)
@@ -392,7 +438,7 @@ class Render_Settings (QtWidgets.QWidget) :
 
         self.edit_pix_var = self.default_line_edit()
         self.edit_pix_var.setMaximumSize(50,22)
-        self.edit_pix_var.setText("0.05")
+        self.edit_pix_var.setText(self.pix_var)
 
         self.edit_pix_var.returnPressed.connect(self.update_slider_pixel_var)
         self.edit_pix_var.editingFinished.connect(self.update_slider_pixel_var)
@@ -454,7 +500,7 @@ class Render_Settings (QtWidgets.QWidget) :
         self.edit_ver = self.default_line_edit()
         self.edit_ver.setMinimumHeight(22)
         self.edit_ver.setAlignment(QtCore.Qt.AlignCenter)
-        self.edit_ver.setText("1")
+        self.edit_ver.setText(self.ver)
         self.lyt_ver.addWidget(self.edit_ver)
 
         #-----# Button Add Ver #-----#
@@ -497,6 +543,7 @@ class Render_Settings (QtWidgets.QWidget) :
     #- Update ComboBox Size 
 
     def update_combobox(self, index):
+
         value = self.combo_img_size.itemData(index)
         if value:
             self.combo_img_size.setEditText(value) 
@@ -510,6 +557,14 @@ class Render_Settings (QtWidgets.QWidget) :
             self.edit_width.setText("1920")
         if value == "100" :
             self.edit_width.setText("100")
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "r", encoding="utf-8") as f :
+            self.nodegraph = json.load(f)
+
+        self.nodegraph[self.data_manager.get_text()[0]]["image_height"] = value
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "w", encoding="utf-8") as nodegraph :
+            json.dump(self.nodegraph, nodegraph, ensure_ascii=False, indent=4) 
 
     #- Previous & Next frame range page 
 
@@ -637,3 +692,41 @@ class Render_Settings (QtWidgets.QWidget) :
             new_value = 1
 
         self.edit_ver.setText(str(new_value))
+
+    #- Json update 
+
+    def width_update_json (self) :
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "r", encoding="utf-8") as f :
+            self.nodegraph = json.load(f)
+
+        width_text = self.edit_width.text()
+
+        self.nodegraph[self.data_manager.get_text()[0]]["image_width"] = width_text
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "w", encoding="utf-8") as nodegraph :
+            json.dump(self.nodegraph, nodegraph, ensure_ascii=False, indent=4) 
+
+    def height_update_json (self) :
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "r", encoding="utf-8") as f :
+            self.nodegraph = json.load(f)
+
+        height_text = self.combo_img_size.currentText()
+
+        self.nodegraph[self.data_manager.get_text()[0]]["image_height"] = height_text
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "w", encoding="utf-8") as nodegraph :
+            json.dump(self.nodegraph, nodegraph, ensure_ascii=False, indent=4) 
+    
+    def min_sample_update_json (self) :
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "r", encoding="utf-8") as f :
+            self.nodegraph = json.load(f)
+
+        min_sample_text = self.edit_min_sample.text()
+
+        self.nodegraph[self.data_manager.get_text()[0]]["image_width"] = min_sample_text
+
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "w", encoding="utf-8") as nodegraph :
+            json.dump(self.nodegraph, nodegraph, ensure_ascii=False, indent=4) 
