@@ -19,15 +19,22 @@ class Load (QtWidgets.QWidget) :
         self.ui_load()
 
     def loader (self) :
-
+        """
+            Verify if 'folder_path' is created else create the line and choose 
+            the right design for the soft
+        """
         with open (f"{paths.JSON_PATH}/nodegraph.json", "r", encoding="utf-8") as f :
             self.nodegraph = json.load(f)
 
-        if self.data_manager.get_text()[0] in self.nodegraph:
-            self.folder_path = self.nodegraph[self.data_manager.get_text()[0]]["folder_path"]
-        else:
+        if self.nodegraph.get(self.data_manager.get_text()[0], {}).get("folder_path") is None:
+
             self.folder_path = ""
-            self.node_not_exist()
+            self.nodegraph[self.data_manager.get_text()[0]]["folder_path"] = ""
+
+            with open (f"{paths.JSON_PATH}/nodegraph.json", "w", encoding="utf-8") as nodegraph :
+                json.dump(self.nodegraph, nodegraph, ensure_ascii=False, indent=4) 
+        else:
+            self.folder_path = self.nodegraph.get(self.data_manager.get_text()[0], {}).get("folder_path")
 
         if self.soft == "maya" :
 
@@ -114,18 +121,9 @@ class Load (QtWidgets.QWidget) :
 
     # ---------------------------------------------------------------- EVENT ----------------------------------------------------------------
 
-    #def node_exist (self) :
-        
-        
-
     def node_not_exist (self) :
     
-        fodler_path = {
-            "id" : self.data_manager.get_text()[2],
-            "folder_path" : ""
-        }
-
-        self.nodegraph[self.data_manager.get_text()[0]] = fodler_path
+        self.nodegraph[self.data_manager.get_text()[0]]["folder_path"] = ""
 
         with open (f"{paths.JSON_PATH}/nodegraph.json", "w", encoding="utf-8") as nodegraph :
             json.dump(self.nodegraph, nodegraph, ensure_ascii=False, indent=4)
@@ -136,6 +134,8 @@ class Load (QtWidgets.QWidget) :
         if file_dialog:
             self.edit_browser.setText(file_dialog[0])
 
+        with open (f"{paths.JSON_PATH}/nodegraph.json", "r", encoding="utf-8") as f :
+            self.nodegraph = json.load(f)
         #- write selected path to json nodegraph
 
         self.nodegraph[self.data_manager.get_text()[0]]["folder_path"] = file_dialog[0]
