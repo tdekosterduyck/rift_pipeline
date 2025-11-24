@@ -8,12 +8,16 @@ from PySide6.QtCore import Qt
 
 class DataManager:
     def __init__(self):
-        self.last_text = ""
+        self.last_name = ""
+        self.last_label = ""
 
-    def save_text(self, text):
-        self.last_text = text
+    def save_text(self, name=None, label= None):
+        if name is not None : 
+            self.last_name = name
+        if name is not None :
+            self.last_label = label
 
     def get_text(self):
-        return self.last_text
+        return self.last_name, self.last_label
         
 
