@@ -1,18 +1,34 @@
-from PySide6 import QtWidgets, QtGui, QtCore
-from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout
+from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon, QFont
-from PySide6.QtCore import QSize
+
+from PySide6.QtWidgets import QHBoxLayout
+from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QPushButton
+from PySide6.QtWidgets import QLineEdit
+from PySide6.QtWidgets import QPushButton
+from PySide6.QtWidgets import QFrame
+from PySide6.QtWidgets import QLabel
+from PySide6.QtWidgets import QLayout
 
 import core.config as paths
 
 class Cstm_Widgets :
 
-    def title_sidebar_style (name, layout, icon, hover_color) :
+    def title_sidebar_style (name:str, layout:QLayout, icon:str, hover_color:str) -> QPushButton:
         """
         Default button style for side bar with icon path inside
+        
+        Args:
+            name (str):
+            layout (str): 
+            icon (str): 
+            hover_color (str): 
+
+        Return:
+            QPushButton: Custom QPushButton
         """
-        btn_default_sidebar = QtWidgets.QPushButton(name)
+
+        btn_default_sidebar = QPushButton(name)
         btn_default_sidebar.setStyleSheet(f"""
             QPushButton{{
                 color: #ffffff;
@@ -43,15 +59,24 @@ class Cstm_Widgets :
         """
         Default separator style 
         """
-        separator = QtWidgets.QFrame()
-        separator.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+        separator = QFrame()
+        separator.setFrameShape(QFrame.Shape.HLine)
         layout.addWidget(separator)
 
-    def default_form_style (layout, lbl, text_edit, place_holder):
+    def default_form_style (layout:QLayout, lbl:str, text_edit:str, place_holder: str | None) -> QLineEdit:
         """
         Default form style for my workspace form
+        
+        Args:
+            layout (QLayout): 
+            lbl (str):
+            text_edit (str):
+            place_holder (str | None):
+
+        Return:
+            QLineEdit: Custom QEditLine
         """
-        lbl_default_form = QtWidgets.QLabel(lbl)
+        lbl_default_form = QLabel(lbl)
         lbl_default_form.setStyleSheet("""
             QLabel {
                 color: #ffffff; 
@@ -59,7 +84,7 @@ class Cstm_Widgets :
             }
         """)
 
-        edit_default_form = QtWidgets.QLineEdit(text_edit,placeholderText=place_holder)
+        edit_default_form = QLineEdit(text_edit,placeholderText=place_holder)
         edit_default_form.setStyleSheet("""
             QLineEdit {
                 margin-right : 25px;
@@ -80,9 +105,16 @@ class Cstm_Widgets :
     
     # ---------------------------------------- # Property Bin # ---------------------------------------- #
 
-    def default_node_title (layout, title, icon_path, soft="maya" or "houdini") :
+    def default_node_title (layout:QLayout, title:str, icon_path:str, soft:str="maya" or "houdini") :
         """
-            Default title for property bin ui
+        Default title for property bin ui
+        
+        Args:
+            layout (QLayout): 
+            title (str):
+            icon_path (str):
+            soft (str):
+            
         """
         if soft == "maya" :
             stop0 = "#4b76ce"
@@ -96,7 +128,7 @@ class Cstm_Widgets :
             hover_stop1 = "#250d05"
 
         #- Degraded group for title
-        grp_default_title = QtWidgets.QWidget()
+        grp_default_title = QWidget()
         grp_default_title.setObjectName("grp_default_title")
         grp_default_title.setMinimumHeight(35)
         grp_default_title.setStyleSheet(f"""
@@ -116,21 +148,21 @@ class Cstm_Widgets :
             """)
 
         #- Layout Title
-        lyt_default_title = QtWidgets.QHBoxLayout()
+        lyt_default_title = QHBoxLayout()
         grp_default_title.setLayout(lyt_default_title)
         lyt_default_title.setContentsMargins(10, 1, 1, 1)  
 
         #- Icon of node
-        lbl_default_icon = QtWidgets.QLabel()
+        lbl_default_icon = QLabel()
 
-        default_icon = QtGui.QPixmap(icon_path)
+        default_icon = QPixmap(icon_path)
 
         lbl_default_icon.setPixmap(default_icon)
         lbl_default_icon.setPixmap(default_icon.scaled(20,20))
         lyt_default_title.addWidget(lbl_default_icon)
 
         #- Title
-        lbl_default_title = QtWidgets.QLabel(title)
+        lbl_default_title = QLabel(title)
         lbl_default_title.setStyleSheet("""
             QLabel {  
                 font-size : 16px;
@@ -138,7 +170,7 @@ class Cstm_Widgets :
                 color : #ffffff;   
         } """)
 
-        lyt_default_title.addWidget(lbl_default_title, alignment=QtCore.Qt.AlignCenter)
+        lyt_default_title.addWidget(lbl_default_title, alignment=Qt.AlignCenter)
         lyt_default_title.addStretch()
 
         layout.addWidget(grp_default_title)
@@ -156,7 +188,7 @@ class Cstm_Widgets :
             lbl_color = "#fe4703"
             lbl_color_hover = "#ff6b35"
 
-        grp_default_subtitle = QtWidgets.QWidget()
+        grp_default_subtitle = QWidget()
         grp_default_subtitle.setObjectName("grp_default_subtitle")
         grp_default_subtitle.setMinimumHeight(20)
         grp_default_subtitle.setStyleSheet("""
@@ -175,11 +207,11 @@ class Cstm_Widgets :
             }
             """)
 
-        lyt_default_subtitle = QtWidgets.QHBoxLayout()
+        lyt_default_subtitle = QHBoxLayout()
         lyt_default_subtitle.setContentsMargins(1,1,1,1)
         grp_default_subtitle.setLayout(lyt_default_subtitle)
 
-        lbl_info_node = QtWidgets.QLabel(subtitle)
+        lbl_info_node = QLabel(subtitle)
         lbl_info_node.setStyleSheet(f"""
             QLabel {{
                 color : {lbl_color};
